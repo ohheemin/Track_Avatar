@@ -1,4 +1,4 @@
-# TRACK_BiManipulator
+# Interacting - BiManipulator
 
 트랙별 종합설계 프로젝트
 
