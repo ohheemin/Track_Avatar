@@ -2,7 +2,7 @@
 
 트랙별 종합설계 프로젝트
 
-상호작용하는 바이매니퓰레이터 제작 프로젝트
+3d reconstruction을 통한 Teleoperation System
 
 # 개발 환경
 
