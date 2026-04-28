@@ -1,0 +1,186 @@
+<?xml version="1.0" ?>
+<robot name="humanoid" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<link name="base_link">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="fr12-h104_v1_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="fr12-h104_v1_2_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="fr12_h101_k_v1_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/fr12_h101_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="Shoulder_Pitch_XM430_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/Shoulder_Pitch_XM430_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="Wrist_Yaw_XL430_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/Wrist_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="Shoulder_Yaw_XL430_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/Shoulder_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="humanoid_robot_arm_v2_lower_arm_conn_1_v2_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_1_v2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="Wrist_Pitch_XL430_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/Wrist_Pitch_XL430_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="humanoid_robot_arm_v2_lower_arm_conn_2_v2_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_2_v2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="Elbow_XL430_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/Elbow_XL430_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="fr12_s102_k_v1_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/fr12_s102_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<link name="Shoulder_Roll_XL430_1">
+  <visual>
+    <geometry>
+      <mesh filename="package://my_robot_description/meshes/Shoulder_Roll_XL430_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </visual>
+</link>
+
+<joint name="joint_28" type="continuous">
+  <origin xyz="0.002 -0.067 -0.029"/>
+  <parent link="Shoulder_Roll_XL430_1"/>
+  <child link="fr12-h104_v1_1"/>
+  <axis xyz="1 0 0"/>
+</joint>
+
+<joint name="joint_30" type="continuous">
+  <origin xyz="-0.016138 0.030008 0.021555"/>
+  <parent link="Elbow_XL430_1"/>
+  <child link="fr12-h104_v1_2_1"/>
+  <axis xyz="0 1 0"/>
+</joint>
+
+<joint name="joint_34" type="continuous">
+  <origin xyz="-0.001612 0.010505 0.169666"/>
+  <parent link="Wrist_Pitch_XL430_1"/>
+  <child link="fr12_h101_k_v1_1"/>
+  <axis xyz="1 0 0"/>
+</joint>
+
+<joint name="joint_38" type="fixed">
+  <origin xyz="0.0 0.0185 0.035"/>
+  <parent link="base_link"/>
+  <child link="Shoulder_Pitch_XM430_1"/>
+</joint>
+
+<joint name="joint_46" type="fixed">
+  <origin xyz="0.000362 -0.018874 -0.029579"/>
+  <parent link="fr12-h104_v1_2_1"/>
+  <child link="Wrist_Yaw_XL430_1"/>
+</joint>
+
+<joint name="joint_47" type="fixed">
+  <origin xyz="-0.019 0.000126 -0.0295"/>
+  <parent link="fr12-h104_v1_1"/>
+  <child link="Shoulder_Yaw_XL430_1"/>
+</joint>
+
+<joint name="joint_48" type="continuous">
+  <origin xyz="0.000443 0.000154 -0.035997"/>
+  <parent link="Wrist_Yaw_XL430_1"/>
+  <child link="humanoid_robot_arm_v2_lower_arm_conn_1_v2_1"/>
+  <axis xyz="0 0 -1"/>
+</joint>
+
+<joint name="joint_49" type="fixed">
+  <origin xyz="0.021628 -0.010153 -0.252225"/>
+  <parent link="humanoid_robot_arm_v2_lower_arm_conn_1_v2_1"/>
+  <child link="Wrist_Pitch_XL430_1"/>
+</joint>
+
+<joint name="joint_50" type="continuous">
+  <origin xyz="0.0 0.000154 -0.035999"/>
+  <parent link="Shoulder_Yaw_XL430_1"/>
+  <child link="humanoid_robot_arm_v2_lower_arm_conn_2_v2_1"/>
+  <axis xyz="0 0 -1"/>
+</joint>
+
+<joint name="joint_51" type="fixed">
+  <origin xyz="0.016138 -0.010513 -0.137473"/>
+  <parent link="humanoid_robot_arm_v2_lower_arm_conn_2_v2_1"/>
+  <child link="Elbow_XL430_1"/>
+</joint>
+
+<joint name="joint_52" type="continuous">
+  <origin xyz="0.0 -0.0375 0.0"/>
+  <parent link="Shoulder_Pitch_XM430_1"/>
+  <child link="fr12_s102_k_v1_1"/>
+  <axis xyz="0 -1 0"/>
+</joint>
+
+<joint name="joint_53" type="fixed">
+  <origin xyz="0.017 0.025 0.029"/>
+  <parent link="fr12_s102_k_v1_1"/>
+  <child link="Shoulder_Roll_XL430_1"/>
+</joint>
+
+</robot>

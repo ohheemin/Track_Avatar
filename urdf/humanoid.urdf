@@ -1,0 +1,498 @@
+<?xml version="1.0" ?>
+<robot name="humanoid">
+  <material name="silver">
+    <color rgba="0.700 0.700 0.700 1.000"/>
+  </material>
+  <transmission name="rotation_26_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rotation_26_actr">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="rotation_28_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rotation_28_actr">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="rotation_30_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_3">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rotation_30_actr">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="rotation_32_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_4">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rotation_32_actr">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="rotation_34_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_5">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rotation_34_actr">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="rotation_35_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_6">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rotation_35_actr">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <gazebo>
+    <plugin filename="libgazebo_ros_control.so" name="control"/>
+  </gazebo>
+  <gazebo reference="base_link">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+    <gravity>true</gravity>
+  </gazebo>
+  <gazebo reference="upper_arm_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="lower_arm_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="Shoulder_Yaw_XL430_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="carbon_pipe_conn_1_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="Shoulder_Roll_XL430_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="fr12-h104_v1_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="fr12-h104_v1_2_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="Wrist_Yaw_XL430_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="lower_arm_conn_1_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="fr12_h101_k_v1_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="fr12_s102_k_v1_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="Shoulder_Pitch_XM430_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="carbon_pipe_conn_2_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="Elbow_XL430_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="lower_arm_conn_2_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <gazebo reference="Wrist_Pitch_XL430_1">
+    <material>Gazebo/Silver</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>true</self_collide>
+  </gazebo>
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0019389896012693933 0.15950000128041772 -0.05703969315432973"/>
+      <mass value="18.957791731760725"/>
+      <inertia ixx="0.180447" ixy="-0.0" ixz="-0.003631" iyy="0.090501" iyz="-0.0" izz="0.096421"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="fr12-h104_v1_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.019000000027990363 0.00924536069283382 -0.022923063335073136"/>
+      <mass value="0.07125966468176162"/>
+      <inertia ixx="1.7e-05" ixy="0.0" ixz="0.0" iyy="2.4e-05" iyz="3e-06" izz="3.2e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.019 0.061 -0.035"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.019 0.061 -0.035"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="fr12-h104_v1_2_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.009428841694465943 -0.018902428335659173 -0.022929342031571293"/>
+      <mass value="0.07125966468176151"/>
+      <inertia ixx="2.4e-05" ixy="-0.0" ixz="3e-06" iyy="1.7e-05" iyz="-0.0" izz="3.2e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0.0 0.041225 0.146417"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.041225 0.146417"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="fr12_h101_k_v1_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.018752122086905684 8.693996043317165e-05 -0.02031172854563601"/>
+      <mass value="0.02254867746596245"/>
+      <inertia ixx="3e-06" ixy="0.0" ixz="-0.0" iyy="8e-06" iyz="0.0" izz="7e-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.020821 0.059593 0.294552"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12_h101_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.020821 0.059593 0.294552"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12_h101_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Shoulder_Pitch_XM430_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-1.6389011103993567e-05 -0.018904775836009923 -0.011562219504417923"/>
+      <mass value="0.34558335606079355"/>
+      <inertia ixx="9.6e-05" ixy="-0.0" ixz="0.0" iyy="8.3e-05" iyz="0.0" izz="5.7e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.0 -0.0185 -0.035"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Shoulder_Pitch_XM430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.0 -0.0185 -0.035"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Shoulder_Pitch_XM430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Wrist_Yaw_XL430_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.011919089169657358 5.26502581171262e-05 -0.017511037277260305"/>
+      <mass value="0.332351713588269"/>
+      <inertia ixx="5.3e-05" ixy="0.0" ixz="-1e-06" iyy="9e-05" iyz="0.0" izz="8e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.000362 0.060099 0.175996"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Wrist_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.000362 0.060099 0.175996"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Wrist_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Shoulder_Yaw_XL430_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="5.293209000168377e-05 0.011968009414415691 -0.017894488212716914"/>
+      <mass value="0.3270705231000746"/>
+      <inertia ixx="8.8e-05" ixy="0.0" ixz="-0.0" iyy="5.1e-05" iyz="-2e-06" izz="7.8e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.0 0.060874 -0.0055"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Shoulder_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.0 0.060874 -0.0055"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Shoulder_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="humanoid_robot_arm_v2_lower_arm_conn_1_v2_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00037305548468012184 0.00012938105191623306 -0.030375556859080638"/>
+      <mass value="0.10004475950123304"/>
+      <inertia ixx="2.6e-05" ixy="-0.0" ixz="0.0" iyy="3.1e-05" iyz="0.0" izz="1.3e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.000805 0.059945 0.211993"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_1_v2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.000805 0.059945 0.211993"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_1_v2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Wrist_Pitch_XL430_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.020197597349777777 0.01040473058790866 0.18106798222377157"/>
+      <mass value="0.33428633030804084"/>
+      <inertia ixx="8e-05" ixy="-0.0" ixz="1e-06" iyy="9.1e-05" iyz="0.0" izz="5.4e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.022433 0.070098 0.464218"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Wrist_Pitch_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.022433 0.070098 0.464218"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Wrist_Pitch_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="humanoid_robot_arm_v2_lower_arm_conn_2_v2_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="2.1316282072803005e-16 0.00021220022900693414 -0.04976868936760821"/>
+      <mass value="0.13838106198037062"/>
+      <inertia ixx="0.000103" ixy="-0.0" ixz="-0.0" iyy="9.9e-05" iyz="0.0" izz="1.5e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.0 0.06072 0.030499"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_2_v2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.0 0.06072 0.030499"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_2_v2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Elbow_XL430_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.01606114348289328 0.011521258639091397 0.033115232379450465"/>
+      <mass value="0.33505485435315263"/>
+      <inertia ixx="9.2e-05" ixy="0.0" ixz="0.0" iyy="8e-05" iyz="1e-06" izz="5.4e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.016138 0.071233 0.167972"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Elbow_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.016138 0.071233 0.167972"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Elbow_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="fr12_s102_k_v1_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="3.525390433170876e-14 -0.003644275137648721 -1.0408340855860843e-16"/>
+      <mass value="0.033467756194338324"/>
+      <inertia ixx="3e-06" ixy="0.0" ixz="0.0" iyy="9e-06" iyz="0.0" izz="7e-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.0 0.019 -0.035"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12_s102_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.0 0.019 -0.035"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/fr12_s102_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Shoulder_Roll_XL430_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.01644381607383257 -0.05536984816863976 -0.028948210488610543"/>
+      <mass value="0.334286343299632"/>
+      <inertia ixx="8e-05" ixy="0.0" ixz="0.0" iyy="5.4e-05" iyz="0.0" izz="9.1e-05"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.017 -0.006 -0.064"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Shoulder_Roll_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.017 -0.006 -0.064"/>
+      <geometry>
+        <mesh filename="package://my_robot_description/meshes/Shoulder_Roll_XL430_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_2" type="continuous">
+    <origin rpy="0 0 0" xyz="0.002 -0.067 -0.029"/>
+    <parent link="Shoulder_Roll_XL430_1"/>
+    <child link="fr12-h104_v1_1"/>
+    <axis xyz="-1.0 0.0 0.0"/>
+  </joint>
+  <joint name="joint_4" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.016138 0.030008 0.021555"/>
+    <parent link="Elbow_XL430_1"/>
+    <child link="fr12-h104_v1_2_1"/>
+    <axis xyz="0.0 -0.999991 -0.00427"/>
+  </joint>
+  <joint name="joint_6" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.001612 0.010505 0.169666"/>
+    <parent link="Wrist_Pitch_XL430_1"/>
+    <child link="fr12_h101_k_v1_1"/>
+    <axis xyz="-0.999925 5.2e-05 -0.012287"/>
+  </joint>
+  <joint name="fixed_38" type="fixed">
+    <origin rpy="0 0 0" xyz="0.0 0.0185 0.035"/>
+    <parent link="base_link"/>
+    <child link="Shoulder_Pitch_XM430_1"/>
+  </joint>
+  <joint name="fixed_46" type="fixed">
+    <origin rpy="0 0 0" xyz="0.000362 -0.018874 -0.029579"/>
+    <parent link="fr12-h104_v1_2_1"/>
+    <child link="Wrist_Yaw_XL430_1"/>
+  </joint>
+  <joint name="fixed_47" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.019 0.000126 -0.0295"/>
+    <parent link="fr12-h104_v1_1"/>
+    <child link="Shoulder_Yaw_XL430_1"/>
+  </joint>
+  <joint name="joint_5" type="continuous">
+    <origin rpy="0 0 0" xyz="0.000443 0.000154 -0.035997"/>
+    <parent link="Wrist_Yaw_XL430_1"/>
+    <child link="humanoid_robot_arm_v2_lower_arm_conn_1_v2_1"/>
+    <axis xyz="0.012287 0.00427 -0.999915"/>
+  </joint>
+  <joint name="fixed_49" type="fixed">
+    <origin rpy="0 0 0" xyz="0.021628 -0.010153 -0.252225"/>
+    <parent link="humanoid_robot_arm_v2_lower_arm_conn_1_v2_1"/>
+    <child link="Wrist_Pitch_XL430_1"/>
+  </joint>
+  <joint name="joint_3" type="continuous">
+    <origin rpy="0 0 0" xyz="0.0 0.000154 -0.035999"/>
+    <parent link="Shoulder_Yaw_XL430_1"/>
+    <child link="humanoid_robot_arm_v2_lower_arm_conn_2_v2_1"/>
+    <axis xyz="-0.0 0.00427 -0.999991"/>
+  </joint>
+  <joint name="fixed_51" type="fixed">
+    <origin rpy="0 0 0" xyz="0.016138 -0.010513 -0.137473"/>
+    <parent link="humanoid_robot_arm_v2_lower_arm_conn_2_v2_1"/>
+    <child link="Elbow_XL430_1"/>
+  </joint>
+  <joint name="joint_1" type="continuous">
+    <origin rpy="0 0 0" xyz="0.0 -0.0375 0.0"/>
+    <parent link="Shoulder_Pitch_XM430_1"/>
+    <child link="fr12_s102_k_v1_1"/>
+    <axis xyz="0.0 -1.0 -0.0"/>
+  </joint>
+  <joint name="fixed_53" type="fixed">
+    <origin rpy="0 0 0" xyz="0.017 0.025 0.029"/>
+    <parent link="fr12_s102_k_v1_1"/>
+    <child link="Shoulder_Roll_XL430_1"/>
+  </joint>
+</robot>

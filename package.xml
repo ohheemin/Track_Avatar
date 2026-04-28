@@ -1,0 +1,15 @@
+<package format="3">
+  <name>avatar</name>
+  <version>0.0.0</version>
+  <description>Avatar package</description>
+  <maintainer email="ohheemin@todo.todo">ohheemin</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend> 
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
