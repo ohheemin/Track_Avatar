@@ -26,10 +26,4 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
-# C++ 헤더 파일이 있는 include 디렉토리 설치
-install(DIRECTORY
-  include/
-  DESTINATION include
-)
-
 ament_package()
