@@ -211,7 +211,7 @@ class DxlHardwareController(Node):
                         ]
                         self.groupSyncWrite.addParam(dxl_id, param_goal_position)
 
-                    self.groupSyncWrite.txPacket()
+                self.groupSyncWrite.txPacket()
             
             # [수정] JointState의 effort가 비어있을 경우를 대비한 안전 장치
             if len(msg.effort) > 0:

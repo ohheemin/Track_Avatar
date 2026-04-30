@@ -6,7 +6,8 @@ from rclpy.node import Node
 from std_msgs.msg import Bool
 from sensor_msgs.msg import JointState
 
-sys.path.insert(0, "/home/ohheemin/.local/lib/python3.10/site-packages")
+# sys.path.insert(0, "/home/ohheemin/.local/lib/python3.10/site-packages")
+sys.path.insert(0, "/home/han/.local/lib/python3.10/site-packages")
 
 import time, math
 import numpy as np

@@ -95,7 +95,7 @@ class TeleopMonitorNode(Node):
             joints_str = ", ".join([f"{val:.2f}" for val in msg.position[:3]])
             gripper_val = msg.position[-1] if len(msg.position) > 0 else 0.0
             gripper_state = "OPEN" if gripper_val > 0.5 else "CLOSED"
-            display_text = f"Joints: [{joints_str}]\nGripper: {gripper_state}"
+            display_text = f"Joints(deg): [{joints_str}]\nGripper: {gripper_state}"
             self.gui_app.root.after(0, self.gui_app.update_robot_states, display_text)
         except Exception: pass
 
@@ -175,8 +175,8 @@ class VisualTestGUI:
         status_frame.pack(fill="both", expand=True, pady=(10, 0))
         status_inner = ctk.CTkFrame(status_frame, fg_color="transparent")
         status_inner.pack(expand=True, fill="x")
-        ctk.CTkLabel(status_inner, text="Live Telemetry", font=ctk.CTkFont(size=16, weight="bold"), text_color="#AEEA00").pack(pady=10)
-        self.lbl_robot_states = ctk.CTkLabel(status_inner, text="Joints: --\nGripper: --", font=ctk.CTkFont(family="Consolas", size=14))
+        ctk.CTkLabel(status_inner, text="Robot State", font=ctk.CTkFont(size=16, weight="bold"), text_color="#AEEA00").pack(pady=10)
+        self.lbl_robot_states = ctk.CTkLabel(status_inner, text="Joints(deg): --\nGripper: --", font=ctk.CTkFont(family="Consolas", size=14))
         self.lbl_robot_states.pack(pady=5)
         self.lbl_motor_current = ctk.CTkLabel(status_inner, text="Current: 0.0 mA", font=ctk.CTkFont(family="Consolas", size=14, weight="bold"), text_color="#FFB300")
         self.lbl_motor_current.pack(pady=5)
@@ -189,7 +189,7 @@ class VisualTestGUI:
 
         cam_frame = ctk.CTkFrame(center_col, corner_radius=25, fg_color=PANEL_BG, border_width=2, border_color="#333333")
         cam_frame.pack(fill="both", expand=True, pady=(0, 10))
-        ctk.CTkLabel(cam_frame, text="Live Vision Feed (STCOM Biz)", font=ctk.CTkFont(size=14, weight="bold")).pack(pady=(10, 0))
+        # ctk.CTkLabel(cam_frame, text="Live Vision Feed (STCOM Biz)", font=ctk.CTkFont(size=14, weight="bold")).pack(pady=(10, 0))
         self.lbl_video = ctk.CTkLabel(cam_frame, text="Initializing Camera...", fg_color="black", corner_radius=15, bg_color=PANEL_BG)
         self.lbl_video.pack(expand=True, fill="both", padx=15, pady=15)
 
