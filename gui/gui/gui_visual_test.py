@@ -86,6 +86,7 @@ class TeleopMonitorNode(Node):
         self.gui_app = gui_app
         self.current_sub = self.create_subscription(Float64, '/motor_1/current', self.current_callback, 10)
         self.joint_sub = self.create_subscription(JointState, '/joint_states', self.joint_callback, 10)
+        self.clock_sub = self.create_subscription(Float64, '/calculated_clock', self.clock_callback, 10)
 
     def current_callback(self, msg):
         self.gui_app.root.after(0, self.gui_app.update_payload_current, msg.data)
@@ -98,6 +99,10 @@ class TeleopMonitorNode(Node):
             display_text = f"Joints(deg): [{joints_str}]\nGripper: {gripper_state}"
             self.gui_app.root.after(0, self.gui_app.update_robot_states, display_text)
         except Exception: pass
+
+    # latency
+    def clock_callback(self, msg):
+        self.gui_app.latest_latency_ms = msg.data
 
 class VisualTestGUI:
     def __init__(self, root):
@@ -113,8 +118,10 @@ class VisualTestGUI:
         self.video_running = False
         self.realsense_online = False
 
+        self.latest_latency_ms = 0.0
+
         self.create_widgets()
-        self.root.after(100, self.open_camera)
+        # self.root.after(100, self.open_camera)
 
         try:
             rclpy.init(args=None)
@@ -326,13 +333,17 @@ class VisualTestGUI:
         self.log_message("PnP Timer Reset.")
 
     def record_latency(self):
-        val = round(random.uniform(15.2, 45.7), 1)
+        val = round(self.latest_latency_ms, 1)
+
         self.lat_inds[self.latency_trial].configure(text=f"{val}")
         self.latency_trial += 1
+
         if self.latency_trial < self.max_latency_trials:
             self.btn_lat_start.configure(state="normal")
         else:
             self.btn_lat_start.configure(text="Done", state="disabled")
+        
+        self.log_message(f"Latency Recorded: {val} ms")
 
     def update_timer(self):
         if self.pnp_timer_running and self.pnp_time_left > 0:
