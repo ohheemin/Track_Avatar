@@ -3,7 +3,7 @@
 import sys
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Int32
 from sensor_msgs.msg import JointState
 
 sys.path.insert(0, "/home/ohheemin/.local/lib/python3.10/site-packages")
@@ -153,7 +153,9 @@ class VisionPublisher(Node):
         super().__init__("vision_publisher")
         self._joint_pub = self.create_publisher(JointState, "/robot/joint_states", 10)
         self._rhand_pub = self.create_publisher(Bool, "/hand_open/right", 10)
-        self.get_logger().info(" Ready to publish /robot/joint_states ")
+        # ── /vision_clock: 카메라 첫 수신 시점부터의 프레임 카운터 ──────────
+        self._clock_pub = self.create_publisher(Int32, "/vision_clock", 10)
+        self.get_logger().info(" Ready to publish /robot/joint_states  /vision_clock ")
 
     def publish_joint_angles(self, thetas: list, frame_idx: int = 0):
         msg = JointState()
@@ -169,6 +171,12 @@ class VisionPublisher(Node):
             msg = Bool()
             msg.data = bool(is_open)
             self._rhand_pub.publish(msg)
+
+    def publish_clock(self, frame_idx: int):
+        """카메라 첫 프레임(0)부터 누적된 프레임 번호를 /vision_clock 으로 발행."""
+        msg      = Int32()
+        msg.data = frame_idx
+        self._clock_pub.publish(msg)
 
 def rotation_x(theta):
     ct, st = np.cos(theta), np.sin(theta)
@@ -627,7 +635,7 @@ def main():
     frame_idx      = 0
 
     print("Running — Q/ESC:Quit  S:Save  D:Depth")
-    print("ROS2: /robot/joint_states  /hand_open/right")
+    print("ROS2: /robot/joint_states  /hand_open/right  /vision_clock")
 
     try:
         while True:
@@ -639,6 +647,9 @@ def main():
             depth_frame = aligned.get_depth_frame()
             if not color_frame or not depth_frame:
                 continue
+
+            # ── /vision_clock: 프레임 수신 직후, mediapipe 추론 전에 발행 ──
+            ros_node.publish_clock(frame_idx)
 
             t0           = color_frame.get_frame_metadata(rs.frame_metadata_value.time_of_arrival)
             color_img    = np.asanyarray(color_frame.get_data())

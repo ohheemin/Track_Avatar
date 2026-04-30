@@ -5,6 +5,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from sensor_msgs.msg import JointState
+from std_msgs.msg import Int32
 
 sys.path.insert(0, "/home/ohheemin/.local/lib/python3.10/site-packages")
 
@@ -152,25 +153,17 @@ class VisionPublisher(Node):
         super().__init__("vision_publisher")
         self._joint_pub = self.create_publisher(JointState, "/robot/joint_states", 10)
         self._rhand_pub = self.create_publisher(Bool, "/hand_open/right", 10)
-        self.get_logger().info(" Ready to publish /robot/joint_states ")
-        #self.frame_idx = None
+        # ── /vision_clock: 카메라 첫 수신 시점부터의 프레임 카운터 ──────────
+        self._clock_pub = self.create_publisher(Int32, "/vision_clock", 10)
+        self.get_logger().info(" Ready to publish /robot/joint_states  /vision_clock ")
 
     def publish_joint_angles(self, thetas: list, frame_idx: int = 0):
-        # #frame_idx = None
-        # msg = JointState()
-        # msg.header.stamp    = self.get_clock().now().to_msg()
-        # msg.header.frame_id = "base_link"
-        # msg.name            = self.JOINT_NAMES
-        # msg.position        = [float(t) for t in thetas]
-        # msg.effort          = [float(frame_idx)]*len(thetas)
-        # self._joint_pub.publish(msg)
-
         msg = JointState()
-        msg.header.stamp    = self.get_clock().now().to_msg()  
+        msg.header.stamp    = self.get_clock().now().to_msg()
         msg.header.frame_id = "base_link"
         msg.name            = self.JOINT_NAMES
         msg.position        = [float(t) for t in thetas]
-        msg.effort          = [float(frame_idx)] * len(thetas) 
+        msg.effort          = [float(frame_idx)] * len(thetas)
         self._joint_pub.publish(msg)
 
     def publish_hand(self, side: str, is_open: bool):
@@ -178,6 +171,13 @@ class VisionPublisher(Node):
             msg = Bool()
             msg.data = bool(is_open)
             self._rhand_pub.publish(msg)
+
+    def publish_clock(self, frame_idx: int):
+        """카메라 첫 프레임(0)부터 누적된 프레임 번호를 /vision_clock 으로 발행."""
+        msg = Int32()
+        msg.data = frame_idx
+        self._clock_pub.publish(msg)
+
 
 def rotation_x(theta):
     ct, st = np.cos(theta), np.sin(theta)
@@ -413,7 +413,7 @@ def compute_dh_joint_angles(arm_coords: dict, pose_lms, rhand_pts: list):
     el_vec_cam = R_mat @ el_vec if el_vec is not None else None
     wr_vec_cam = R_mat @ wr_vec if wr_vec is not None else None
 
-    return [theta1, theta2, theta3, theta4, 0.3 * theta5, -theta6], (el_vec_cam, wr_vec_cam)
+    return [theta1, theta2, theta3, theta4, 0.3 * theta5, -0.7 * theta6], (el_vec_cam, wr_vec_cam)
 
 
 def _project(pt3d, intrinsics):
@@ -632,10 +632,10 @@ def main():
     lat_frame_avg  = 0.0
     show_depth     = False
     depth_win_open = False
-    frame_idx      = 0
+    frame_idx      = 0          # 카메라 첫 수신 시점부터 누적되는 프레임 카운터
 
     print("Running — Q/ESC:Quit  S:Save  D:Depth")
-    print("ROS2: /robot/joint_states  /hand_open/right")
+    print("ROS2: /robot/joint_states  /hand_open/right  /vision_clock")
 
     try:
         while True:
@@ -723,6 +723,9 @@ def main():
                                else raw_thetas[i] for i in range(6)]
             filtered_thetas = jnt_filter.update(raw_thetas)
             ros_node.publish_joint_angles(filtered_thetas, frame_idx)
+
+            # ── /vision_clock: 매 프레임 카운터 발행 ──────────────────────────
+            ros_node.publish_clock(frame_idx)
 
             T = build_transform_matrix(arm_coords, result.pose_landmarks)
 
@@ -844,7 +847,7 @@ def main():
                 raw_str = " ".join(f"{math.degrees(t):+.1f}" for t in raw_thetas)
                 kf_str  = " ".join(f"{math.degrees(t):+.1f}" for t in kf_thetas)
                 pub_str = " ".join(f"{math.degrees(t):+.1f}" for t in filtered_thetas)
-                print(f"[{frame_idx:05d}] Lat:{lat_frame_ms:.0f}ms")
+                print(f"[{frame_idx:05d}] Lat:{lat_frame_ms:.0f}ms  /vision_clock={frame_idx}")
                 print(f"  raw:   [{raw_str}]")
                 print(f"  kalman:[{kf_str}]")
                 print(f"  pub:   [{pub_str}]")
@@ -861,7 +864,7 @@ def main():
                 try:
                     cv2.destroyWindow("Depth Map")
                 except Exception:
-                    pass           
+                    pass
                 depth_win_open = False
 
             key = cv2.waitKey(1) & 0xFF
@@ -873,7 +876,8 @@ def main():
                 print(f"[SAVE] {fn}")
             elif key == ord("d"):
                 show_depth = not show_depth
-            frame_idx += 1
+
+            frame_idx += 1   # 루프 마지막에 증가 → 0번 프레임부터 정확히 카운트
 
     finally:
         pipeline.stop()

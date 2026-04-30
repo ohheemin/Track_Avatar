@@ -178,14 +178,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -198,14 +198,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.019 0.061 -0.035"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12-h104_v1_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.019 0.061 -0.035"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12-h104_v1_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -218,14 +218,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0.0 0.041225 0.146417"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12-h104_v1_2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.041225 0.146417"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12-h104_v1_2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12-h104_v1_2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -238,14 +238,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.020821 0.059593 0.294552"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12_h101_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12_h101_k_v1_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.020821 0.059593 0.294552"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12_h101_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12_h101_k_v1_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -258,14 +258,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0 -0.0185 -0.035"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Shoulder_Pitch_XM430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Shoulder_Pitch_XM430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0 -0.0185 -0.035"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Shoulder_Pitch_XM430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Shoulder_Pitch_XM430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -278,14 +278,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.000362 0.060099 0.175996"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Wrist_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Wrist_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.000362 0.060099 0.175996"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Wrist_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Wrist_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -298,14 +298,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0 0.060874 -0.0055"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Shoulder_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Shoulder_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0 0.060874 -0.0055"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Shoulder_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Shoulder_Yaw_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -318,14 +318,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.000805 0.059945 0.211993"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_1_v2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/humanoid_robot_arm_v2_lower_arm_conn_1_v2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.000805 0.059945 0.211993"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_1_v2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/humanoid_robot_arm_v2_lower_arm_conn_1_v2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -338,14 +338,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.022433 0.070098 0.464218"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Wrist_Pitch_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Wrist_Pitch_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.022433 0.070098 0.464218"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Wrist_Pitch_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Wrist_Pitch_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -358,14 +358,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0 0.06072 0.030499"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_2_v2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/humanoid_robot_arm_v2_lower_arm_conn_2_v2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0 0.06072 0.030499"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/humanoid_robot_arm_v2_lower_arm_conn_2_v2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/humanoid_robot_arm_v2_lower_arm_conn_2_v2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -378,14 +378,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.016138 0.071233 0.167972"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Elbow_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Elbow_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.016138 0.071233 0.167972"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Elbow_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Elbow_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -398,14 +398,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0 0.019 -0.035"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12_s102_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12_s102_k_v1_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0 0.019 -0.035"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/fr12_s102_k_v1_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/fr12_s102_k_v1_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -418,14 +418,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.017 -0.006 -0.064"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Shoulder_Roll_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Shoulder_Roll_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.017 -0.006 -0.064"/>
       <geometry>
-        <mesh filename="package://my_robot_description/meshes/Shoulder_Roll_XL430_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://avatar/meshes/Shoulder_Roll_XL430_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>

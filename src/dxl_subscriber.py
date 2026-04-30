@@ -31,16 +31,23 @@ ADDR_PROFILE_ACCELERATION   = 108
 ADDR_PWM_LIMIT              = 36
 ADDR_PRESENT_POSITION       = 132
 ADDR_GOAL_PWM               = 100
-ADDR_POSITION_D_GAIN        = 80  
+ADDR_POSITION_D_GAIN        = 80
+ADDR_POSITION_I_GAIN        = 82
+ADDR_POSITION_P_GAIN        = 84  
 ADDR_FEEDFORWARD_2ND_GAIN   = 88  
 ADDR_FEEDFORWARD_1ST_GAIN   = 90  
 
 # --- 튜닝 및 한계 설정 변수 ---
 LIMIT_VELOCITY = 120
 LIMIT_ACCELERATION = 30
-D_GAIN_VALUE     = 2000 
+D_GAIN_VALUE     = 1000
+I_GAIN_VALUE     = 200
+P_GAIN_VALUE     = 1000 
 FF1_GAIN_VALUE   = 150  
-DEADBAND_STEP    = 3    
+DEADBAND_STEP    = 3
+
+ff1_gain = 400
+ff2_gain = 0
 
 PROTOCOL_VERSION        = 2.0
 BAUDRATE                = 1000000        
@@ -92,11 +99,16 @@ class DxlHardwareController(Node):
                 self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, 0)
                 self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, 0)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_D_GAIN, D_GAIN_VALUE)
-                self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_FEEDFORWARD_1ST_GAIN, FF1_GAIN_VALUE)
+                self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_I_GAIN, D_GAIN_VALUE)
+                self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_P_GAIN, D_GAIN_VALUE)
+
+                self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_FEEDFORWARD_1ST_GAIN, ff1_gain)
+                self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_FEEDFORWARD_2ND_GAIN, ff2_gain)
+                #self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_FEEDFORWARD_1ST_GAIN, FF1_GAIN_VALUE)
 
         # --- 그리퍼 설정 ---
-        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_ACCELERATION, LIMIT_ACCELERATION)
-        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_VELOCITY, LIMIT_VELOCITY)
+        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_ACCELERATION, 0)
+        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_VELOCITY, 0)
         self.packetHandler.write1ByteTxRx(self.portHandler, 7, ADDR_OPERATING_MODE, OP_MODE_PWM)
         self.packetHandler.write2ByteTxRx(self.portHandler, 7, ADDR_PWM_LIMIT, 650)
 
@@ -107,6 +119,7 @@ class DxlHardwareController(Node):
         self.joint_name_to_id = {'joint_1': 1, 'joint_2': 2, 'joint_3': 3, 'joint_4': 4, 'joint_5': 5, 'joint_6': 6}
 
         self.subscription = self.create_subscription(JointState, '/dynamixel_controller/joint_cmds', self.joint_state_callback, 10)
+        #self.subscription = self.create_subscription(JointState, '/robot/joint_states', self.joint_state_callback, 10)
         self.hand_sub = self.create_subscription(Bool, '/hand_open/right', self.hand_state_callback, 10)
         self.index_pub = self.create_publisher(Int32, "/index", 10)
         self.timer = self.create_timer(0.01, self.index_callback)
@@ -121,11 +134,11 @@ class DxlHardwareController(Node):
     
     def rad_to_dxl_lim(self, rad):
         step = int((rad / (2.0 * math.pi)) * 4096.0) + 2048
-        return max(2048, min(4095, step)) 
+        return max(2048, min(3298, step)) 
     
     def rad_to_dxl_6(self, rad):
         step = int((rad / (2.0 * math.pi)) * 4096.0) + 2048
-        return max(2048, min(3072, step)) 
+        return max(1536, min(3072, step)) 
 
     def joint_state_callback(self, msg):
         if self.flag == 1:
@@ -211,14 +224,17 @@ class DxlHardwareController(Node):
             if dxl_present_position > 700 and self.hand_prev_pos == dxl_present_position:
                 goal_pwm = -600
             else:
-                goal_pwm = -300
+                if dxl_present_position < 700:
+                    goal_pwm = -250
+                else:
+                    goal_pwm = -400
         else: # 열기
             if dxl_present_position > 2048:
                 goal_pwm = 0
             elif self.hand_prev_pos == dxl_present_position:
                 goal_pwm = 600
             else:
-                goal_pwm = 300
+                goal_pwm = 450
 
         self.packetHandler.write2ByteTxRx(self.portHandler, 7, ADDR_GOAL_PWM, goal_pwm)
         self.hand_prev_pos = dxl_present_position # 상태 갱신

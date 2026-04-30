@@ -11,7 +11,7 @@ class JerkLimitedFilterNode(Node):
         super().__init__('jerk_limited_filter_node')
 
         # 1. 제어 주기 설정 (예: 100Hz = 0.01초)
-        self.control_period = 0.01
+        self.control_period = 0.05
         
         # 2. Ruckig 관련 변수
         self.dof = 0                  # 관절 개수 (첫 메시지 수신 시 초기화)
@@ -56,9 +56,9 @@ class JerkLimitedFilterNode(Node):
 
         # XL430 모터 및 기구부의 기계적 한계치 설정 (튜닝 필수)
         # rad/s, rad/s^2, rad/s^3 단위
-        self.inp.max_velocity = [2.0] * self.dof      # 최대 속도
-        self.inp.max_acceleration = [3.0] * self.dof  # 최대 가속도
-        self.inp.max_jerk = [15.0] * self.dof         # 최대 저크 (이 값이 작을수록 부드러움)
+        self.inp.max_velocity = [4.0] * self.dof      # 최대 속도
+        self.inp.max_acceleration = [2.0] * self.dof  # 최대 가속도
+        self.inp.max_jerk = [8.0] * self.dof         # 최대 저크 (이 값이 작을수록 부드러움)
         
         self.is_initialized = True
         self.get_logger().info(f"Ruckig 초기화 완료: {self.dof} DoF")
