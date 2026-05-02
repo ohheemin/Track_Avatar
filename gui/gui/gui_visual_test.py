@@ -8,6 +8,8 @@ import subprocess
 import threading
 import signal
 
+from collections import deque
+
 # --- ROS2 Python 라이브러리 임포트 ---
 import rclpy
 from rclpy.node import Node
@@ -80,6 +82,18 @@ def _cleanup_processes_by_key(dedup_key):
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+class DataBuffer:
+    def __init__(self, max_rows=100, num_elements=1):
+        self.buffer = deque(maxlen=max_rows)
+        self.num_elements = num_elements
+
+    def add_data(self, new_list):
+        if len(new_list) == self.num_elements:
+            self.buffer.append(new_list)
+
+    def get_matrix(self):
+        return np.array(self.buffer)
+
 class TeleopMonitorNode(Node):
     def __init__(self, gui_app):
         super().__init__('teleop_gui_monitor')
@@ -102,7 +116,9 @@ class TeleopMonitorNode(Node):
 
     # latency
     def clock_callback(self, msg):
-        self.gui_app.latest_latency_ms = msg.data
+        # self.gui_app.latest_latency_ms = msg.data
+        # self.save_target.add_data(self.gui_app.latest_latency_ms.copy())
+        self.gui_app.root.after(0, self.gui_app.update_latency_buffer, msg.data)
 
 class VisualTestGUI:
     def __init__(self, root):
@@ -120,6 +136,9 @@ class VisualTestGUI:
 
         self.latest_latency_ms = 0.0
 
+        self.latency_buffer = deque(maxlen=100)
+        self.current_avg_latency = 0.0
+
         self.create_widgets()
         # self.root.after(100, self.open_camera)
 
@@ -130,6 +149,8 @@ class VisualTestGUI:
             self.ros_thread.start()
         except Exception as e:
             self.log_message(f"Failed to init ROS2 Node: {e}")
+            
+        self.save_latency = DataBuffer(max_rows=100, num_elements=1)
 
     def create_widgets(self):
         ROOT_BG = "#121212"
@@ -163,7 +184,7 @@ class VisualTestGUI:
         ctk.CTkLabel(rs_inner, text="RealSense Controller", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=5)
         self.lbl_rs_status = ctk.CTkLabel(rs_inner, text="[ D435i Offline ]", text_color="#FF5252", font=ctk.CTkFont(size=13, weight="bold"))
         self.lbl_rs_status.pack(pady=5)
-        self.btn_realsense = ctk.CTkButton(rs_inner, text="Start RealSense", height=40, corner_radius=12, fg_color="#006064", border_width=2, border_color="#00ACC1", command=self.toggle_realsense)
+        self.btn_realsense = ctk.CTkButton(rs_inner, text="Start RealSense", height=40, corner_radius=12, fg_color="#0277BD", border_width=2, border_color="#0277BD", command=self.toggle_realsense)
         self.btn_realsense.pack(fill="x", padx=30)
 
         # Robot Planning
@@ -174,7 +195,7 @@ class VisualTestGUI:
         ctk.CTkLabel(robot_inner, text="Robot Planning", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=5)
         self.lbl_robot_status = ctk.CTkLabel(robot_inner, text="[ Planning Offline ]", text_color="#FF5252", font=ctk.CTkFont(size=13, weight="bold"))
         self.lbl_robot_status.pack(pady=5)
-        self.btn_planning = ctk.CTkButton(robot_inner, text="Start Planning", height=40, corner_radius=12, fg_color="#1B5E20", border_width=2, border_color="#43A047", command=self.mock_start_planning)
+        self.btn_planning = ctk.CTkButton(robot_inner, text="Start Planning", height=40, corner_radius=12, fg_color="#0277BD", border_width=2, border_color="#0277BD", command=self.mock_start_planning)
         self.btn_planning.pack(fill="x", padx=30)
 
         # Status Monitor
@@ -185,7 +206,7 @@ class VisualTestGUI:
         ctk.CTkLabel(status_inner, text="Robot State", font=ctk.CTkFont(size=16, weight="bold"), text_color="#AEEA00").pack(pady=10)
         self.lbl_robot_states = ctk.CTkLabel(status_inner, text="Joints(deg): --\nGripper: --", font=ctk.CTkFont(family="Consolas", size=14))
         self.lbl_robot_states.pack(pady=5)
-        self.lbl_motor_current = ctk.CTkLabel(status_inner, text="Current: 0.0 mA", font=ctk.CTkFont(family="Consolas", size=14, weight="bold"), text_color="#FFB300")
+        self.lbl_motor_current = ctk.CTkLabel(status_inner, text="Current: 0.0 mA", font=ctk.CTkFont(family="Consolas", size=14))
         self.lbl_motor_current.pack(pady=5)
 
         # ==========================================
@@ -230,7 +251,7 @@ class VisualTestGUI:
         p_inner.pack(expand=True)
         ctk.CTkLabel(p_inner, text="Payload Test (80g)", font=ctk.CTkFont(size=16, weight="bold"), text_color="#FFB300").pack(pady=15)
         
-        self.btn_payload_start = ctk.CTkButton(p_inner, text="Execute Payload Test", height=45, corner_radius=12, fg_color="#00695C", command=lambda: self.start_trial("payload"))
+        self.btn_payload_start = ctk.CTkButton(p_inner, text="Execute Payload Test", height=45, corner_radius=12, fg_color="#0277BD", command=lambda: self.start_trial("payload"))
         self.btn_payload_start.pack(fill="x", padx=30, pady=10)
 
         # Latency (기존 유지)
@@ -239,7 +260,12 @@ class VisualTestGUI:
         l_inner = ctk.CTkFrame(lat_frame, fg_color="transparent")
         l_inner.pack(expand=True)
         ctk.CTkLabel(l_inner, text="Latency Check (ms)", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=5)
-        self.btn_lat_start = ctk.CTkButton(l_inner, text="Measure", corner_radius=12, height=40, fg_color="#455A64", command=lambda: self.start_trial("latency"))
+
+        # latency 평균
+        self.lbl_realtime_latency = ctk.CTkLabel(l_inner, text="Real-time Avg: -- ms", text_color="#AEEA00", font=ctk.CTkFont(family="Consolas", size=14, weight="bold"))
+        self.lbl_realtime_latency.pack(pady=2)
+
+        self.btn_lat_start = ctk.CTkButton(l_inner, text="Measure", corner_radius=12, height=40, fg_color="#0277BD", command=lambda: self.start_trial("latency"))
         self.btn_lat_start.pack(fill="x", padx=30, pady=10)
         self.lat_inds = []
         l_ind_f = ctk.CTkFrame(l_inner, fg_color="transparent")
@@ -303,11 +329,11 @@ class VisualTestGUI:
             _cleanup_processes_by_key("realsense_key")
             self.realsense_online = False
             self.lbl_rs_status.configure(text="[ D435i Offline ]", text_color="#FF5252")
-            self.btn_realsense.configure(text="Start RealSense", fg_color="#006064")
+            self.btn_realsense.configure(text="Start RealSense", fg_color="#0277BD")
 
     def mock_start_planning(self):
         if _launch_ros2_run(WORKSPACE_SETUP, "avatar", "dxl_subscriber.py", None, "RobotPlanning", "planning_key"):
-            self.lbl_robot_status.configure(text="[ Planning Online ]", text_color="#4CAF50")
+            self.lbl_robot_status.configure(text="[ Planning Online ]", text_color="#0277BD")
             self.btn_planning.configure(state="disabled")
 
     def start_trial(self, t_type):
@@ -332,8 +358,23 @@ class VisualTestGUI:
         self.btn_pnp_start.configure(state="normal")
         self.log_message("PnP Timer Reset.")
 
+    def update_latency_buffer(self, new_val):
+        self.latency_buffer.append(new_val)
+        # 버퍼에 쌓인 데이터의 평균 계산
+        self.current_avg_latency = sum(self.latency_buffer) / len(self.latency_buffer)
+        # UI에 실시간 표시
+        self.lbl_realtime_latency.configure(text=f"Real-time Avg: {int(self.current_avg_latency)} ms")
+        
+        # (선택) 기존의 save_target 로직이 필요하다면 여기서 사용 가능합니다.
+        # self.save_latency.add_data([self.current_avg_latency])
+
     def record_latency(self):
-        val = int(self.latest_latency_ms)
+        # 데이터가 아직 안 들어왔을 경우 방어 코드
+        if not self.latency_buffer:
+            self.log_message("Warning: No latency data received yet.")
+            return
+
+        val = int(self.current_avg_latency)
 
         self.lat_inds[self.latency_trial].configure(text=f"{val}")
         self.latency_trial += 1
@@ -343,7 +384,7 @@ class VisualTestGUI:
         else:
             self.btn_lat_start.configure(text="Done", state="disabled")
         
-        self.log_message(f"Latency Recorded: {val} ms")
+        self.log_message(f"Latency Recorded: {val} ms (Averaged)")
 
     def update_timer(self):
         if self.pnp_timer_running and self.pnp_time_left > 0:
@@ -362,7 +403,7 @@ class VisualTestGUI:
         self.pnp_timer_running = False
         self.lbl_rs_status.configure(text="[ D435i Offline ]", text_color="#FF5252")
         self.lbl_robot_status.configure(text="[ Planning Offline ]", text_color="#FF5252")
-        self.btn_realsense.configure(text="Start RealSense", fg_color="#006064")
+        self.btn_realsense.configure(text="Start RealSense", fg_color="#0277BD")
         self.btn_planning.configure(state="normal")
         self.log_message("Emergency Stop Initiated.")
 
