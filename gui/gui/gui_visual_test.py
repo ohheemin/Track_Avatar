@@ -295,7 +295,7 @@ class VisualTestGUI:
 
     def toggle_realsense(self):
         if not self.realsense_online:
-            if _launch_ros2_run(WORKSPACE_SETUP, "avatar", "vision.py", [], "RealSense", "realsense_key"):
+            if _launch_ros2_run(WORKSPACE_SETUP, "avatar", "vision_nk.py", [], "RealSense", "realsense_key"):
                 self.realsense_online = True
                 self.lbl_rs_status.configure(text="[ D435i Online ]", text_color="#4CAF50")
                 self.btn_realsense.configure(text="Stop RealSense", fg_color="#D81B60")
@@ -333,7 +333,7 @@ class VisualTestGUI:
         self.log_message("PnP Timer Reset.")
 
     def record_latency(self):
-        val = round(self.latest_latency_ms, 1)
+        val = int(self.latest_latency_ms)
 
         self.lat_inds[self.latency_trial].configure(text=f"{val}")
         self.latency_trial += 1
