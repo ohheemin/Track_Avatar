@@ -37,9 +37,11 @@ ADDR_POSITION_P_GAIN        = 84
 ADDR_FEEDFORWARD_2ND_GAIN   = 88  
 ADDR_FEEDFORWARD_1ST_GAIN   = 90  
 
+ADDR_DRIVE_MODE = 10
+
 # --- 튜닝 및 한계 설정 변수 ---
-LIMIT_VELOCITY = 100
-LIMIT_ACCELERATION = 0
+LIMIT_VELOCITY = 120
+LIMIT_ACCELERATION = 30
 D_GAIN_VALUE     = 1000
 I_GAIN_VALUE     = 200
 P_GAIN_VALUE     = 1000  
@@ -47,7 +49,7 @@ FF1_GAIN_VALUE   = 150
 DEADBAND_STEP    = 3 
 
 ff1_gain = 400
-ff2_gain = 20
+ff2_gain = 0
 
 PROTOCOL_VERSION        = 2.0
 BAUDRATE                = 1000000        
@@ -88,16 +90,12 @@ class DxlHardwareController(Node):
         self.last_sent_pos = {dxl_id: -1 for dxl_id in self.dxl_ids}
         self.hand_prev_pos = -1 # [수정] 그리퍼 이전 상태 저장용 변수 초기화
 
-        # =============ema=============
-        self.alpha = 0.2
-        self.filtered_pos = {}
-
         # --- SyncRead 초기화 (1~6번 모터 위치 동시 읽기) ---
         self.groupSyncRead = dxl.GroupSyncRead(self.portHandler, self.packetHandler, ADDR_PRESENT_POSITION, 4)
         for i in range(1, 7):
             self.groupSyncRead.addParam(i)
 
-        # ------------syncwrite 초기하 ----------
+        # ------------syncwrite 초기ㅗ하 ----------
         self.groupSyncWrite = dxl.GroupSyncWrite(self.portHandler, self.packetHandler, ADDR_GOAL_POSITION, 4)
 
         # --- 모터 설정 ---
@@ -105,8 +103,10 @@ class DxlHardwareController(Node):
             if dxl_id != 7: # ---------------------vel이랑 Accel 값 수정--------------------------
                 self.packetHandler.write1ByteTxRx(self.portHandler, dxl_id, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
                 self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_OPERATING_MODE, 3)
-                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, LIMIT_ACCELERATION)
-                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, LIMIT_VELOCITY)
+                self.packetHandler.write1ByteTxRx(self.portHandler, dxl_id, ADDR_DRIVE_MODE, 4)
+                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, 5)
+                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, 20)
+
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_D_GAIN, D_GAIN_VALUE)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_I_GAIN, I_GAIN_VALUE)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_P_GAIN, P_GAIN_VALUE)
@@ -115,8 +115,8 @@ class DxlHardwareController(Node):
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_FEEDFORWARD_2ND_GAIN, ff2_gain)
 
         # --- 그리퍼 설정 ---
-        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_ACCELERATION, 0)
-        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_VELOCITY, 0)
+        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_ACCELERATION, LIMIT_ACCELERATION)
+        self.packetHandler.write4ByteTxRx(self.portHandler, 7, ADDR_PROFILE_VELOCITY, LIMIT_VELOCITY)
         self.packetHandler.write1ByteTxRx(self.portHandler, 7, ADDR_OPERATING_MODE, OP_MODE_PWM)
         self.packetHandler.write2ByteTxRx(self.portHandler, 7, ADDR_PWM_LIMIT, 650)
 
@@ -208,34 +208,24 @@ class DxlHardwareController(Node):
                     dxl_id = self.joint_name_to_id[name]
                     target_rad = msg.position[i]
                     
-                    # =======ema=========
-                    if dxl_id in self.dxl_x_lim: raw_target = self.rad_to_dxl(target_rad)
-                    elif dxl_id in self.dxl_o_lim: raw_target = self.rad_to_dxl_lim(target_rad)
-                    elif dxl_id in self.dxl_6_lim: raw_target = self.rad_to_dxl_6(target_rad)
-                    else: raw_target = self.rad_to_dxl(target_rad)
+                    if dxl_id in self.dxl_x_lim: target_pos = self.rad_to_dxl(target_rad)
+                    elif dxl_id in self.dxl_o_lim: target_pos = self.rad_to_dxl_lim(target_rad)
+                    elif dxl_id in self.dxl_6_lim: target_pos = self.rad_to_dxl_6(target_rad)
+                    else: target_pos = self.rad_to_dxl(target_rad)
 
-                    if dxl_id not in self.filtered_pos:
-                        self.filtered_pos[dxl_id] = raw_target
-                    else:
-                        self.filtered_pos[dxl_id] = (self.alpha * raw_target) + ((1.0 - self.alpha) * self.filtered_pos[dxl_id])
-
-                    target_pos = int(self.filtered_pos[dxl_id])
-
+                    # [수정] 배열 크기를 미리 할당해 두었으므로 안전하게 삽입
                     self.target_pos_array[dxl_id - 1] = target_pos
 
                     if dxl_id != 7:
                         if abs(target_pos - self.last_sent_pos[dxl_id]) <= DEADBAND_STEP:
-                            target_to_send = self.last_sent_pos[dxl_id]
-                        else:
-                            target_to_send = target_pos
-                            self.last_sent_pos[dxl_id] = target_to_send
-                        # self.last_sent_pos[dxl_id] = target_pos
+                            continue
+                        self.last_sent_pos[dxl_id] = target_pos
 
                         param_goal_position = [
-                            dxl.DXL_LOBYTE(dxl.DXL_LOWORD(target_to_send)), 
-                            dxl.DXL_HIBYTE(dxl.DXL_LOWORD(target_to_send)), 
-                            dxl.DXL_LOBYTE(dxl.DXL_HIWORD(target_to_send)), 
-                            dxl.DXL_HIBYTE(dxl.DXL_HIWORD(target_to_send))
+                            dxl.DXL_LOBYTE(dxl.DXL_LOWORD(target_pos)), 
+                            dxl.DXL_HIBYTE(dxl.DXL_LOWORD(target_pos)), 
+                            dxl.DXL_LOBYTE(dxl.DXL_HIWORD(target_pos)), 
+                            dxl.DXL_HIBYTE(dxl.DXL_HIWORD(target_pos))
                         ]
                         self.groupSyncWrite.addParam(dxl_id, param_goal_position)
 
@@ -256,14 +246,10 @@ class DxlHardwareController(Node):
 
         # [수정] 클래스 멤버 변수를 활용해 이전 상태와 비교 로직 정상화
         if hand_state == False: # 닫기
-            if dxl_present_position > 840:
-                if self.hand_prev_pos == dxl_present_position:
-                    goal_pwm = -600
-                else:    
-                    goal_pwm = - min(((650 - 250) * (dxl_present_position + 2048) / (2048 * 2) + 250), 650)
+            if dxl_present_position > 700 and self.hand_prev_pos == dxl_present_position:
+                goal_pwm = -600
             else:
-                goal_pwm = -250
-
+                goal_pwm = -400
         else: # 열기
             if dxl_present_position > 2048:
                 goal_pwm = 0
@@ -272,7 +258,7 @@ class DxlHardwareController(Node):
             else:
                 goal_pwm = 450
 
-        self.packetHandler.write2ByteTxRx(self.portHandler, 7, ADDR_GOAL_PWM, int(goal_pwm))
+        self.packetHandler.write2ByteTxRx(self.portHandler, 7, ADDR_GOAL_PWM, goal_pwm)
         self.hand_prev_pos = dxl_present_position # 상태 갱신
         #self.get_logger().info(f'Gripper Position: {dxl_present_position}')   
 
@@ -297,7 +283,7 @@ class DxlHardwareController(Node):
             else:
                 return # 데이터 누락 시 오작동 방지
 
-        clearance_half = 8
+        clearance_half = 11
         diff = np.abs(joint_n_id[:, :6] - position)
         
         # [최적화] 이중 for문 대신 NumPy의 초고속 벡터 비교

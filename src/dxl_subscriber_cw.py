@@ -38,8 +38,8 @@ ADDR_FEEDFORWARD_2ND_GAIN   = 88
 ADDR_FEEDFORWARD_1ST_GAIN   = 90  
 
 # --- 튜닝 및 한계 설정 변수 ---
-LIMIT_VELOCITY = 100
-LIMIT_ACCELERATION = 0
+LIMIT_VELOCITY = 200
+LIMIT_ACCELERATION = 50
 D_GAIN_VALUE     = 1000
 I_GAIN_VALUE     = 200
 P_GAIN_VALUE     = 1000  
@@ -47,7 +47,7 @@ FF1_GAIN_VALUE   = 150
 DEADBAND_STEP    = 3 
 
 ff1_gain = 400
-ff2_gain = 20
+ff2_gain = 0
 
 PROTOCOL_VERSION        = 2.0
 BAUDRATE                = 1000000        
@@ -89,7 +89,7 @@ class DxlHardwareController(Node):
         self.hand_prev_pos = -1 # [수정] 그리퍼 이전 상태 저장용 변수 초기화
 
         # =============ema=============
-        self.alpha = 0.2
+        self.alpha = 0.15
         self.filtered_pos = {}
 
         # --- SyncRead 초기화 (1~6번 모터 위치 동시 읽기) ---
@@ -97,7 +97,7 @@ class DxlHardwareController(Node):
         for i in range(1, 7):
             self.groupSyncRead.addParam(i)
 
-        # ------------syncwrite 초기하 ----------
+        # ------------syncwrite 초기ㅗ하 ----------
         self.groupSyncWrite = dxl.GroupSyncWrite(self.portHandler, self.packetHandler, ADDR_GOAL_POSITION, 4)
 
         # --- 모터 설정 ---
@@ -256,7 +256,7 @@ class DxlHardwareController(Node):
 
         # [수정] 클래스 멤버 변수를 활용해 이전 상태와 비교 로직 정상화
         if hand_state == False: # 닫기
-            if dxl_present_position > 840:
+            if dxl_present_position > 700:
                 if self.hand_prev_pos == dxl_present_position:
                     goal_pwm = -600
                 else:    
@@ -297,7 +297,7 @@ class DxlHardwareController(Node):
             else:
                 return # 데이터 누락 시 오작동 방지
 
-        clearance_half = 8
+        clearance_half = 11
         diff = np.abs(joint_n_id[:, :6] - position)
         
         # [최적화] 이중 for문 대신 NumPy의 초고속 벡터 비교

@@ -38,8 +38,8 @@ ADDR_FEEDFORWARD_2ND_GAIN   = 88
 ADDR_FEEDFORWARD_1ST_GAIN   = 90  
 
 # --- 튜닝 및 한계 설정 변수 ---
-LIMIT_VELOCITY = 100
-LIMIT_ACCELERATION = 0
+LIMIT_VELOCITY = 200
+LIMIT_ACCELERATION = 50
 D_GAIN_VALUE     = 1000
 I_GAIN_VALUE     = 200
 P_GAIN_VALUE     = 1000  
@@ -47,7 +47,7 @@ FF1_GAIN_VALUE   = 150
 DEADBAND_STEP    = 3 
 
 ff1_gain = 400
-ff2_gain = 20
+ff2_gain = 0
 
 PROTOCOL_VERSION        = 2.0
 BAUDRATE                = 1000000        
@@ -88,25 +88,19 @@ class DxlHardwareController(Node):
         self.last_sent_pos = {dxl_id: -1 for dxl_id in self.dxl_ids}
         self.hand_prev_pos = -1 # [수정] 그리퍼 이전 상태 저장용 변수 초기화
 
-        # =============ema=============
-        self.alpha = 0.2
-        self.filtered_pos = {}
-
         # --- SyncRead 초기화 (1~6번 모터 위치 동시 읽기) ---
         self.groupSyncRead = dxl.GroupSyncRead(self.portHandler, self.packetHandler, ADDR_PRESENT_POSITION, 4)
         for i in range(1, 7):
             self.groupSyncRead.addParam(i)
 
-        # ------------syncwrite 초기하 ----------
+        # ------------syncwrite 초기ㅗ하 ----------
         self.groupSyncWrite = dxl.GroupSyncWrite(self.portHandler, self.packetHandler, ADDR_GOAL_POSITION, 4)
 
         # --- 모터 설정 ---
         for dxl_id in self.dxl_ids:
             if dxl_id != 7: # ---------------------vel이랑 Accel 값 수정--------------------------
-                self.packetHandler.write1ByteTxRx(self.portHandler, dxl_id, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
-                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_OPERATING_MODE, 3)
-                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, LIMIT_ACCELERATION)
-                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, LIMIT_VELOCITY)
+                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, 10)
+                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, 20)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_D_GAIN, D_GAIN_VALUE)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_I_GAIN, I_GAIN_VALUE)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_P_GAIN, P_GAIN_VALUE)
@@ -149,93 +143,84 @@ class DxlHardwareController(Node):
         return max(1536, min(3072, step)) 
 
     def joint_state_callback(self, msg):
+        print("1")
         if self.flag == 1:
-            second = 3
-            num_steps = second * 100        
-            target_angle_matrix = np.zeros((6, num_steps)) # ID 1~6 행렬 생성
-
+            
+            second = 2
             # [최적화] SyncRead로 현재 위치를 한 번에 싹 다 가져옴
             self.groupSyncRead.txRxPacket()
 
-            for i, name in enumerate(msg.name):
-                if name in self.joint_name_to_id:
-                    dxl_id = self.joint_name_to_id[name]
-                    target_rad = msg.position[i]
-                    
-                    # 변환 한계치 적용
-                    if dxl_id in self.dxl_x_lim: target_pos = self.rad_to_dxl(target_rad)
-                    elif dxl_id in self.dxl_o_lim: target_pos = self.rad_to_dxl_lim(target_rad)
-                    elif dxl_id in self.dxl_6_lim: target_pos = self.rad_to_dxl_6(target_rad)
-                    else: target_pos = self.rad_to_dxl(target_rad)
-
-                    # 현재 위치 읽기
-                    if self.groupSyncRead.isAvailable(dxl_id, ADDR_PRESENT_POSITION, 4):
-                        init_pos = self.groupSyncRead.getData(dxl_id, ADDR_PRESENT_POSITION, 4)
-                    else:
-                        init_pos = 2048 # 통신 실패 시 기본값
-
-                    # DXL 스텝 값으로 바로 궤적 생성
-                    traj = jerk_limited_trajectory_dxl(init_pos, target_pos, second, num_steps - 1)
-                    # 메시지 순서에 상관없이 dxl_id를 기준으로 행렬에 삽입 (버그 방지)
-                    target_angle_matrix[dxl_id - 1, :] = traj
-
-            # 궤적 전송 루프
-            self.get_logger().info("초기 궤적 이동 시작...")
-            for step_idx in range(num_steps):
-                self.groupSyncWrite.clearParam()
-                for id_idx in range(6):
-                    dxl_id = id_idx + 1
-                    target_cmd = int(target_angle_matrix[id_idx, step_idx])
-                    
-                    param_goal_position = [
-                        dxl.DXL_LOBYTE(dxl.DXL_LOWORD(target_cmd)), 
-                        dxl.DXL_HIBYTE(dxl.DXL_LOWORD(target_cmd)), 
-                        dxl.DXL_LOBYTE(dxl.DXL_HIWORD(target_cmd)), 
-                        dxl.DXL_HIBYTE(dxl.DXL_HIWORD(target_cmd))
-                    ]
-                    self.groupSyncWrite.addParam(dxl_id, param_goal_position)
-
-                self.groupSyncWrite.txPacket()
-                time.sleep(0.01) # 100Hz 주기
-            
-            self.get_logger().info("초기 이동 완료!")
-            self.flag = 2         
-        
-        elif self.flag == 2:
             self.groupSyncWrite.clearParam()
             for i, name in enumerate(msg.name):
                 if name in self.joint_name_to_id:
                     dxl_id = self.joint_name_to_id[name]
                     target_rad = msg.position[i]
                     
-                    # =======ema=========
-                    if dxl_id in self.dxl_x_lim: raw_target = self.rad_to_dxl(target_rad)
-                    elif dxl_id in self.dxl_o_lim: raw_target = self.rad_to_dxl_lim(target_rad)
-                    elif dxl_id in self.dxl_6_lim: raw_target = self.rad_to_dxl_6(target_rad)
-                    else: raw_target = self.rad_to_dxl(target_rad)
+                    if dxl_id in self.dxl_x_lim: target_pos = self.rad_to_dxl(target_rad)
+                    elif dxl_id in self.dxl_o_lim: target_pos = self.rad_to_dxl_lim(target_rad)
+                    elif dxl_id in self.dxl_6_lim: target_pos = self.rad_to_dxl_6(target_rad)
+                    else: target_pos = self.rad_to_dxl(target_rad)
 
-                    if dxl_id not in self.filtered_pos:
-                        self.filtered_pos[dxl_id] = raw_target
-                    else:
-                        self.filtered_pos[dxl_id] = (self.alpha * raw_target) + ((1.0 - self.alpha) * self.filtered_pos[dxl_id])
-
-                    target_pos = int(self.filtered_pos[dxl_id])
-
+                    # [수정] 배열 크기를 미리 할당해 두었으므로 안전하게 삽입
                     self.target_pos_array[dxl_id - 1] = target_pos
 
                     if dxl_id != 7:
                         if abs(target_pos - self.last_sent_pos[dxl_id]) <= DEADBAND_STEP:
-                            target_to_send = self.last_sent_pos[dxl_id]
-                        else:
-                            target_to_send = target_pos
-                            self.last_sent_pos[dxl_id] = target_to_send
-                        # self.last_sent_pos[dxl_id] = target_pos
+                            continue
+                        self.last_sent_pos[dxl_id] = target_pos
 
                         param_goal_position = [
-                            dxl.DXL_LOBYTE(dxl.DXL_LOWORD(target_to_send)), 
-                            dxl.DXL_HIBYTE(dxl.DXL_LOWORD(target_to_send)), 
-                            dxl.DXL_LOBYTE(dxl.DXL_HIWORD(target_to_send)), 
-                            dxl.DXL_HIBYTE(dxl.DXL_HIWORD(target_to_send))
+                            dxl.DXL_LOBYTE(dxl.DXL_LOWORD(target_pos)), 
+                            dxl.DXL_HIBYTE(dxl.DXL_LOWORD(target_pos)), 
+                            dxl.DXL_LOBYTE(dxl.DXL_HIWORD(target_pos)), 
+                            dxl.DXL_HIBYTE(dxl.DXL_HIWORD(target_pos))
+                        ]
+                        self.groupSyncWrite.addParam(dxl_id, param_goal_position)
+
+            self.groupSyncWrite.txPacket()
+
+            time.sleep(second)
+
+            if len(msg.effort) > 0:
+                self.target_pos_array[6] = int(msg.effort[0])
+            else:
+                self.target_pos_array[6] = 0
+            
+            self.get_logger().info("초기 이동 완료!")
+            self.flag = 2
+
+        elif self.flag == 2:
+            for dxl_id in self.dxl_ids:
+                if dxl_id != 7:
+                    self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, LIMIT_ACCELERATION)
+                    self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, LIMIT_VELOCITY)  
+            self.flag = 3       
+        
+        elif self.flag == 3:
+            self.groupSyncWrite.clearParam()
+            for i, name in enumerate(msg.name):
+                if name in self.joint_name_to_id:
+                    dxl_id = self.joint_name_to_id[name]
+                    target_rad = msg.position[i]
+                    
+                    if dxl_id in self.dxl_x_lim: target_pos = self.rad_to_dxl(target_rad)
+                    elif dxl_id in self.dxl_o_lim: target_pos = self.rad_to_dxl_lim(target_rad)
+                    elif dxl_id in self.dxl_6_lim: target_pos = self.rad_to_dxl_6(target_rad)
+                    else: target_pos = self.rad_to_dxl(target_rad)
+
+                    # [수정] 배열 크기를 미리 할당해 두었으므로 안전하게 삽입
+                    self.target_pos_array[dxl_id - 1] = target_pos
+
+                    if dxl_id != 7:
+                        if abs(target_pos - self.last_sent_pos[dxl_id]) <= DEADBAND_STEP:
+                            continue
+                        self.last_sent_pos[dxl_id] = target_pos
+
+                        param_goal_position = [
+                            dxl.DXL_LOBYTE(dxl.DXL_LOWORD(target_pos)), 
+                            dxl.DXL_HIBYTE(dxl.DXL_LOWORD(target_pos)), 
+                            dxl.DXL_LOBYTE(dxl.DXL_HIWORD(target_pos)), 
+                            dxl.DXL_HIBYTE(dxl.DXL_HIWORD(target_pos))
                         ]
                         self.groupSyncWrite.addParam(dxl_id, param_goal_position)
 
@@ -256,7 +241,7 @@ class DxlHardwareController(Node):
 
         # [수정] 클래스 멤버 변수를 활용해 이전 상태와 비교 로직 정상화
         if hand_state == False: # 닫기
-            if dxl_present_position > 840:
+            if dxl_present_position > 700:
                 if self.hand_prev_pos == dxl_present_position:
                     goal_pwm = -600
                 else:    
@@ -297,7 +282,7 @@ class DxlHardwareController(Node):
             else:
                 return # 데이터 누락 시 오작동 방지
 
-        clearance_half = 8
+        clearance_half = 11
         diff = np.abs(joint_n_id[:, :6] - position)
         
         # [최적화] 이중 for문 대신 NumPy의 초고속 벡터 비교

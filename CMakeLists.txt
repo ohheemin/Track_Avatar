@@ -9,11 +9,15 @@ find_package(ament_cmake REQUIRED)
 
 install(PROGRAMS
   src/dxl_subscriber.py
+  src/dxl_subscriber_js.py
+  src/dxl_subscriber_cw.py
+  src/dxl_test.py
   src/jerk_limit_filter.py
   src/rviz_control.py
   src/pose.py
   src/vision.py
   src/vision_nk.py
+  src/vision_nav.py
   src/gui.py
   src/clock.py
   DESTINATION lib/${PROJECT_NAME}
