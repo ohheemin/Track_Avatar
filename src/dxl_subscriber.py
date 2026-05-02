@@ -262,7 +262,7 @@ class DxlHardwareController(Node):
                 else:    
                     goal_pwm = - min(((650 - 250) * (dxl_present_position + 2048) / (2048 * 2) + 250), 650)
             else:
-                goal_pwm = -250
+                goal_pwm = -300
 
         else: # 열기
             if dxl_present_position > 2048:

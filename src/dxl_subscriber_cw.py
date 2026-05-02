@@ -97,7 +97,7 @@ class DxlHardwareController(Node):
         for i in range(1, 7):
             self.groupSyncRead.addParam(i)
 
-        # ------------syncwrite 초기ㅗ하 ----------
+        # ------------syncwrite 초기하 ----------
         self.groupSyncWrite = dxl.GroupSyncWrite(self.portHandler, self.packetHandler, ADDR_GOAL_POSITION, 4)
 
         # --- 모터 설정 ---
