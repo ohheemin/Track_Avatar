@@ -152,10 +152,11 @@ class VisionPublisher(Node):
     def __init__(self):
         super().__init__("vision_publisher")
         self._joint_pub = self.create_publisher(JointState, "/robot/joint_states", 10)
+        self._raw_pub   = self.create_publisher(JointState, "/js_awwww", 10)   # 칼만 적용 전 raw
         self._rhand_pub = self.create_publisher(Bool, "/hand_open/right", 10)
         # ── /vision_clock: 카메라 첫 수신 시점부터의 프레임 카운터 ──────────
         self._clock_pub = self.create_publisher(Int32, "/vision_clock", 10)
-        self.get_logger().info(" Ready to publish /robot/joint_states  /vision_clock ")
+        self.get_logger().info(" Ready to publish /robot/joint_states  /js_awwww  /vision_clock ")
 
     def publish_joint_angles(self, thetas: list, frame_idx: int = 0):
         msg = JointState()
@@ -165,6 +166,16 @@ class VisionPublisher(Node):
         msg.position        = [float(t) for t in thetas]
         msg.effort          = [float(frame_idx)] * len(thetas)
         self._joint_pub.publish(msg)
+
+    def publish_raw_joint_angles(self, thetas: list, frame_idx: int = 0):
+        """칼만 필터 적용 전 raw 관절각을 /js_awwww 로 발행. effort는 frame_idx."""
+        msg = JointState()
+        msg.header.stamp    = self.get_clock().now().to_msg()
+        msg.header.frame_id = "base_link"
+        msg.name            = self.JOINT_NAMES
+        msg.position        = [float(t) for t in thetas]
+        msg.effort          = [float(frame_idx)] * len(thetas)
+        self._raw_pub.publish(msg)
 
     def publish_hand(self, side: str, is_open: bool):
         if side == "right":
@@ -635,7 +646,7 @@ def main():
     frame_idx      = 0          # 카메라 첫 수신 시점부터 누적되는 프레임 카운터
 
     print("Running — Q/ESC:Quit  S:Save  D:Depth")
-    print("ROS2: /robot/joint_states  /hand_open/right  /vision_clock")
+    print("ROS2: /robot/joint_states  /js_awwww  /hand_open/right  /vision_clock")
 
     try:
         while True:
@@ -715,10 +726,14 @@ def main():
                 rhand_pts = collect_hand_3d(result.right_hand_landmarks, depth_frame, intrinsics, w, h)
                 draw_hand_on_frame(disp, result.right_hand_landmarks, w, h, COLOR_RH_CV, depth_frame, intrinsics)
 
-            # ── 관절각 계산 → 필터 → publish ──────────────────────────────────
+            # ── 관절각 계산 ────────────────────────────────────────────────────
             raw_thetas, (el_vec_cam, wr_vec_cam) = compute_dh_joint_angles(
                 arm_coords, result.pose_landmarks, rhand_pts)
 
+            # ── 칼만 적용 전 raw 값을 /js_awwww 로 발행 ───────────────────────
+            ros_node.publish_raw_joint_angles(raw_thetas, frame_idx)
+
+            # ── 칼만 + 이동평균 + 데드밴드 필터 → /robot/joint_states 발행 ────
             kf_thetas       = [jnt_filter.kf[i].x[0, 0] if jnt_filter.kf[i].initialized
                                else raw_thetas[i] for i in range(6)]
             filtered_thetas = jnt_filter.update(raw_thetas)

@@ -94,6 +94,7 @@ class DataBuffer:
             self.buffer.append(new_list)
 
     def get_matrix(self):
+        import numpy as np
         return np.array(self.buffer)
 
 class TeleopMonitorNode(Node):
@@ -116,10 +117,7 @@ class TeleopMonitorNode(Node):
             self.gui_app.root.after(0, self.gui_app.update_robot_states, display_text)
         except Exception: pass
 
-    # latency
     def clock_callback(self, msg):
-        # self.gui_app.latest_latency_ms = msg.data
-        # self.save_target.add_data(self.gui_app.latest_latency_ms.copy())
         self.gui_app.root.after(0, self.gui_app.update_latency_buffer, msg.data)
 
 class VisualTestGUI:
@@ -142,7 +140,6 @@ class VisualTestGUI:
         self.current_avg_latency = 0.0
 
         self.create_widgets()
-        # self.root.after(100, self.open_camera)
 
         try:
             rclpy.init(args=None)
@@ -158,11 +155,6 @@ class VisualTestGUI:
         ROOT_BG = "#121212"
         PANEL_BG = "#1E1E1E"
         ACCENT_BLUE = "#4FC3F7"
-
-        # title_label = ctk.CTkLabel(self.root, text="3D Reconstruction based - Teleoperation System", 
-        #                            font=ctk.CTkFont(family="Helvetica", size=24, weight="bold"), 
-        #                            text_color=ACCENT_BLUE, bg_color=ROOT_BG)
-        # title_label.pack(pady=(15, 10))
 
         content_wrapper = ctk.CTkFrame(self.root, fg_color=ROOT_BG, corner_radius=0)
         content_wrapper.pack(fill="both", expand=True, padx=20, pady=5)
@@ -197,7 +189,10 @@ class VisualTestGUI:
         ctk.CTkLabel(robot_inner, text="Robot Planning", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=5)
         self.lbl_robot_status = ctk.CTkLabel(robot_inner, text="[ Planning Offline ]", text_color="#FF5252", font=ctk.CTkFont(size=13, weight="bold"))
         self.lbl_robot_status.pack(pady=5)
-        self.btn_planning = ctk.CTkButton(robot_inner, text="Start Planning", height=40, corner_radius=12, fg_color="#0277BD", border_width=2, border_color="#0277BD", command=self.mock_start_planning)
+        # 카운트다운 숫자 표시 레이블 (평소엔 숨김)
+        self.lbl_countdown = ctk.CTkLabel(robot_inner, text="", font=ctk.CTkFont(size=48, weight="bold"), text_color="#FF5252")
+        self.lbl_countdown.pack(pady=2)
+        self.btn_planning = ctk.CTkButton(robot_inner, text="Start Planning", height=40, corner_radius=12, fg_color="#0277BD", border_width=2, border_color="#0277BD", command=self.start_planning_with_tts)
         self.btn_planning.pack(fill="x", padx=30)
 
         # Status Monitor
@@ -219,7 +214,6 @@ class VisualTestGUI:
 
         cam_frame = ctk.CTkFrame(center_col, corner_radius=25, fg_color=PANEL_BG, border_width=2, border_color="#333333")
         cam_frame.pack(fill="both", expand=True, pady=(0, 10))
-        # ctk.CTkLabel(cam_frame, text="Live Vision Feed (STCOM Biz)", font=ctk.CTkFont(size=14, weight="bold")).pack(pady=(10, 0))
         self.lbl_video = ctk.CTkLabel(cam_frame, text="Initializing Camera...", fg_color="black", corner_radius=15, bg_color=PANEL_BG)
         self.lbl_video.pack(expand=True, fill="both", padx=15, pady=15)
 
@@ -230,7 +224,6 @@ class VisualTestGUI:
         self.lbl_timer = ctk.CTkLabel(pnp_frame, text="02:00", text_color="#00E5FF", font=ctk.CTkFont(family="Consolas", size=28, weight="bold"))
         self.lbl_timer.pack(pady=5)
         
-        # PnP 제어 버튼 프레임 (O/X 제거 후 Start/Reset 배치)
         pnp_btn_f = ctk.CTkFrame(pnp_frame, fg_color="transparent")
         pnp_btn_f.pack(pady=5)
         
@@ -246,7 +239,6 @@ class VisualTestGUI:
         right_col = ctk.CTkFrame(content_wrapper, fg_color=ROOT_BG)
         right_col.grid(row=0, column=2, sticky="nsew", padx=(15, 0))
 
-        # Payload Test (수동 버튼 제거)
         payload_frame = ctk.CTkFrame(right_col, corner_radius=25, fg_color=PANEL_BG, border_width=2, border_color="#333333")
         payload_frame.pack(fill="both", expand=True, pady=(0, 10))
         p_inner = ctk.CTkFrame(payload_frame, fg_color="transparent")
@@ -256,14 +248,12 @@ class VisualTestGUI:
         self.btn_payload_start = ctk.CTkButton(p_inner, text="Execute Payload Test", height=45, corner_radius=12, fg_color="#0277BD", command=lambda: self.start_trial("payload"))
         self.btn_payload_start.pack(fill="x", padx=30, pady=10)
 
-        # Latency (기존 유지)
         lat_frame = ctk.CTkFrame(right_col, corner_radius=25, fg_color=PANEL_BG, border_width=2, border_color="#333333")
         lat_frame.pack(fill="both", expand=True, pady=(10, 0))
         l_inner = ctk.CTkFrame(lat_frame, fg_color="transparent")
         l_inner.pack(expand=True)
         ctk.CTkLabel(l_inner, text="Latency Check (ms)", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=5)
 
-        # latency 평균
         self.lbl_realtime_latency = ctk.CTkLabel(l_inner, text="Real-time Avg: -- ms", text_color="#AEEA00", font=ctk.CTkFont(family="Consolas", size=14, weight="bold"))
         self.lbl_realtime_latency.pack(pady=2)
 
@@ -287,6 +277,9 @@ class VisualTestGUI:
         self.btn_stop = ctk.CTkButton(bottom_wrapper, text="EMERGENCY\nSTOP", width=120, height=120, corner_radius=60, fg_color="#B71C1C", hover_color="#D32F2F", font=ctk.CTkFont(size=14, weight="bold"), border_width=4, border_color="#FFCDD2", command=self.mock_stop_all)
         self.btn_stop.pack(side="right")
 
+    # ─────────────────────────────────────────────────────────────
+    # 유틸리티
+    # ─────────────────────────────────────────────────────────────
     def log_message(self, msg):
         self.log_area.configure(state="normal")
         self.log_area.insert("end", f"[{time.strftime('%H:%M:%S')}] {msg}\n")
@@ -321,6 +314,9 @@ class VisualTestGUI:
                 self.root.after(30, self.update_video_frame)
         except Exception: pass
 
+    # ─────────────────────────────────────────────────────────────
+    # RealSense
+    # ─────────────────────────────────────────────────────────────
     def toggle_realsense(self):
         if not self.realsense_online:
             if _launch_ros2_run(WORKSPACE_SETUP, "avatar", "vision_nav.py", [], "RealSense", "realsense_key"):
@@ -333,11 +329,73 @@ class VisualTestGUI:
             self.lbl_rs_status.configure(text="[ D435i Offline ]", text_color="#FF5252")
             self.btn_realsense.configure(text="Start RealSense", fg_color="#0277BD")
 
-    def mock_start_planning(self):
-        if _launch_ros2_run(WORKSPACE_SETUP, "avatar", "dxl_subscriber.py", None, "RobotPlanning", "planning_key"):
-            self.lbl_robot_status.configure(text="[ Planning Online ]", text_color="#0277BD")
-            self.btn_planning.configure(state="disabled")
+    # ─────────────────────────────────────────────────────────────
+    # Planning: TTS → 카운트다운 3,2,1 → 노드 시작 → 6초 후 TTS
+    # ─────────────────────────────────────────────────────────────
+    def _tts_and_launch_planning(self):
+        """별도 스레드에서 실행: TTS 재생 → 3초 카운트다운 → 노드 시작 → 6초 후 TTS."""
+        # 1. TTS 안내 멘트
+        try:
+            from gtts import gTTS
+            import playsound
 
+            text = "자리에 앉아서 차렷자세를 취해주세요. 3초 후에 시작합니다."
+            filename = "/tmp/planning_announce.mp3"
+            tts = gTTS(text=text, lang='ko')
+            tts.save(filename)
+            playsound.playsound(filename)
+            if os.path.exists(filename):
+                os.remove(filename)
+        except Exception as e:
+            print(f"[TTS] Error: {e}")
+
+        # 2. 카운트다운 3 → 2 → 1 (GUI 레이블에 크게 표시)
+        for n in range(3, 0, -1):
+            self.root.after(0, self.lbl_countdown.configure, {"text": str(n)})
+            self.root.after(0, self.lbl_robot_status.configure,
+                            {"text": f"[ Starting in {n}s... ]", "text_color": "#FF5252"})
+            time.sleep(1)
+
+        # 카운트다운 레이블 지우기
+        self.root.after(0, self.lbl_countdown.configure, {"text": ""})
+
+        # 3. 노드 시작
+        if _launch_ros2_run(WORKSPACE_SETUP, "avatar", "dxl_subscriber.py", None, "RobotPlanning", "planning_key"):
+            self.root.after(0, self.lbl_robot_status.configure,
+                            {"text": "[ Planning Online ]", "text_color": "#0277BD"})
+            self.root.after(0, self.btn_planning.configure, {"state": "disabled"})
+            self.root.after(0, self.log_message, "Planning node started.")
+
+            # 4. 노드 시작 후 6초 대기 → "텔레오퍼레이션 시작" TTS
+            time.sleep(4)
+            try:
+                from gtts import gTTS
+                import playsound
+                tts2 = gTTS(text="이제 텔레오퍼레이션을 시작해주세요.", lang='ko')
+                tts2.save("/tmp/teleop_start.mp3")
+                playsound.playsound("/tmp/teleop_start.mp3")
+                if os.path.exists("/tmp/teleop_start.mp3"):
+                    os.remove("/tmp/teleop_start.mp3")
+            except Exception as e:
+                print(f"[TTS] Error: {e}")
+
+        else:
+            self.root.after(0, self.lbl_robot_status.configure,
+                            {"text": "[ Planning Offline ]", "text_color": "#FF5252"})
+            self.root.after(0, self.btn_planning.configure, {"state": "normal"})
+            self.root.after(0, self.log_message, "Failed to start planning node.")
+
+    def start_planning_with_tts(self):
+        """버튼 클릭 → 버튼 비활성화 후 백그라운드 스레드로 TTS+카운트다운+론치."""
+        self.btn_planning.configure(state="disabled")
+        self.lbl_robot_status.configure(text="[ Preparing... ]", text_color="#FFB300")
+        self.log_message("TTS 안내 중 — 3초 후 Planning 노드 시작 예정.")
+        t = threading.Thread(target=self._tts_and_launch_planning, daemon=True)
+        t.start()
+
+    # ─────────────────────────────────────────────────────────────
+    # 기타 기능
+    # ─────────────────────────────────────────────────────────────
     def start_trial(self, t_type):
         if t_type == "payload":
             self.log_message("Payload Test (80g) Executed.")
@@ -353,7 +411,6 @@ class VisualTestGUI:
                 self.root.after(500, self.record_latency)
 
     def reset_pnp(self):
-        """타이머를 초기 상태(02:00)로 리셋하는 함수"""
         self.pnp_timer_running = False
         self.pnp_time_left = 120
         self.lbl_timer.configure(text="02:00", text_color="#00E5FF")
@@ -362,30 +419,20 @@ class VisualTestGUI:
 
     def update_latency_buffer(self, new_val):
         self.latency_buffer.append(new_val)
-        # 버퍼에 쌓인 데이터의 평균 계산
         self.current_avg_latency = sum(self.latency_buffer) / len(self.latency_buffer)
-        # UI에 실시간 표시
         self.lbl_realtime_latency.configure(text=f"Real-time Avg: {int(self.current_avg_latency)} ms")
-        
-        # (선택) 기존의 save_target 로직이 필요하다면 여기서 사용 가능합니다.
-        # self.save_latency.add_data([self.current_avg_latency])
 
     def record_latency(self):
-        # 데이터가 아직 안 들어왔을 경우 방어 코드
         if not self.latency_buffer:
             self.log_message("Warning: No latency data received yet.")
             return
-
         val = int(self.current_avg_latency)
-
         self.lat_inds[self.latency_trial].configure(text=f"{val}")
         self.latency_trial += 1
-
         if self.latency_trial < self.max_latency_trials:
             self.btn_lat_start.configure(state="normal")
         else:
             self.btn_lat_start.configure(text="Done", state="disabled")
-        
         self.log_message(f"Latency Recorded: {val} ms (Averaged)")
 
     def update_timer(self):
@@ -405,9 +452,11 @@ class VisualTestGUI:
         self.pnp_timer_running = False
         self.lbl_rs_status.configure(text="[ D435i Offline ]", text_color="#FF5252")
         self.lbl_robot_status.configure(text="[ Planning Offline ]", text_color="#FF5252")
+        self.lbl_countdown.configure(text="")
         self.btn_realsense.configure(text="Start RealSense", fg_color="#0277BD")
         self.btn_planning.configure(state="normal")
         self.log_message("Emergency Stop Initiated.")
+
 
 def main(args=None):
     root = ctk.CTk()

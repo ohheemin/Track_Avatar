@@ -105,8 +105,8 @@ class DxlHardwareController(Node):
             if dxl_id != 7: # ---------------------vel이랑 Accel 값 수정--------------------------
                 self.packetHandler.write1ByteTxRx(self.portHandler, dxl_id, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
                 self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_OPERATING_MODE, 3)
-                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, LIMIT_ACCELERATION)
-                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, LIMIT_VELOCITY)
+                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_ACCELERATION, 0)
+                self.packetHandler.write4ByteTxRx(self.portHandler, dxl_id, ADDR_PROFILE_VELOCITY, 0)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_D_GAIN, D_GAIN_VALUE)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_I_GAIN, I_GAIN_VALUE)
                 self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_POSITION_P_GAIN, P_GAIN_VALUE)
